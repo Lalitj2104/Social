@@ -42,6 +42,7 @@ export const registerUser = async (req, res) => {
         message: msg.missingFieldMessage,
       });
     }
+    console.log("Password: ", password);
 
     let user = await User.findOne({ username });
     if (user) {
@@ -255,6 +256,7 @@ export const resendOtp = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log("Password: ", password);
 
     if (!email || !password) {
       return Response(res, 400, false, msg.missingFieldMessage);
