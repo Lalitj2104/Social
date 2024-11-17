@@ -18,4 +18,7 @@ export const message = {
   userProfileUpdatedMessage: "User profile updated successfully",
   unAuthorizedMessage:"Please login to access this resource",
   badAuthMessage: "Invalid email or password",
+  userNotVerifiedMessage:"user is not verified,Please first verify",
+  otpSendMessage:"otp sent successfully"
 };
+

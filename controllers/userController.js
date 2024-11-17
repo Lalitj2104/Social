@@ -5,9 +5,11 @@ import { Response } from "../utils/response.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
-
+import cloudinary from "cloudinary"
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+
 let emailTemplate = fs.readFileSync(
   path.join(__dirname, "../templates/mail.html"),
   "utf-8"
@@ -26,7 +28,9 @@ export const registerUser = async (req, res) => {
       bio,
       username,
       gender,
+      avatar
     } = req.body;
+
     if (
       !firstName ||
       !lastName ||
@@ -59,6 +63,20 @@ export const registerUser = async (req, res) => {
         message: msg.userAlreadyExistMessage,
       });
     }
+    //upload image in cloudinary
+    if(avatar){
+      const result=await cloudinary.v2.uploader.upload(avatar,{
+        folder:"avators",
+        //width:150
+        //crp:"scale",
+        //height:150,
+      })
+        req.body.avatar={
+          public_id:result.public_id,
+          url:result.secure_url
+        }
+      
+    }
 
     user = await User.create({ ...req.body });
 
@@ -83,7 +101,7 @@ export const registerUser = async (req, res) => {
     res.status(201).json({
       success: true,
       message: msg.userCreatedMessage,
-      data: user,
+      data: user._id,
     });
   } catch (error) {
     res.status(500).json({
@@ -278,18 +296,22 @@ export const loginUser = async (req, res) => {
     if (!user) {
       return Response(res, 400, false, msg.userNotFoundMessage);
     }
-    console.log(user);
+    // console.log(user);
+    //if user not verified
+    if(!user.isVerified){
+      return Response(res,400,false,msg.userNotVerifiedMessage)
+    }
 
     //if login attempt is locked
     if (user.lockUntil < Date.now()) {
-      user.loginAttempts = 0;
+      user.loginOtpAttempts = 0;
       user.loginOtp = undefined;
       await user.save();
       return Response(res, 400, false, msg.loginLockedMessage);
     }
     //iflogin attempts exceeded
-    if (user.loginAttempts >= process.env.MAX_LOGIN_ATTEMPTS) {
-      user.loginAttempts = 0;
+    if (user.loginOtpAttempts >= process.env.MAX_LOGIN_ATTEMPTS) {
+      user.loginOtpAttempts = 0;
       user.loginOtp = undefined;
       user.lockUntil = new Date(
         Date.now() + process.env.MAX_LOGIN_ATTEMPTS_EXPIRE * 60 * 1000
@@ -304,7 +326,7 @@ export const loginUser = async (req, res) => {
     const isMatch = await user.matchPassword(password);
     console.log(isMatch);
     if (!isMatch) {
-      user.loginAttempts += 1;
+      user.loginOtpAttempts += 1;
       await user.save();
 
       return Response(res, 400, false, msg.badAuthMessage);
@@ -330,13 +352,16 @@ export const loginUser = async (req, res) => {
     // Update user with otp
     user.loginOtp = otp;
     user.loginOtpExpire = otpExpire;
-    user.loginAttempts = 0;
+    user.loginOtpAttempts = 0;
     user.lockUntil = undefined;
 
     await user.save();
 
     // send response
-    Response(res, 200, true, msg.otpSendMessage);
+    Response(res, 200, true, msg.otpSendMessage,user._id);
+    // res.render("otp",{
+    //   id:user._id,
+    // });
   } catch (error) {
     //  Response(res, 500, false, error.message);
     return res.status(500).json({
@@ -365,6 +390,10 @@ export const LoginVerify = async (req, res) => {
     }
     // console.log(user);
 
+    //if user not verified
+    if(!user.isVerified){
+      return Response(res,400,false,msg.userNotVerifiedMessage)
+    }
     //checking lock to login
     if (user?.loginOtpAttemptsExpire > Date.now()) {
       return Response(res, 400, false, msg.loginLockedMessage);
@@ -387,12 +416,16 @@ export const LoginVerify = async (req, res) => {
     }
 
     //matching the otp
-    // otp = Number(otp);
+    console.log(otp);
+    otp = Number(otp);
+    console.log(typeof otp);
+    console.log(typeof user.loginOtp);
+    
     if (user?.loginOtp !== otp) {
       user.otpAttempts += 1;
       await user.save();
 
-      return Response(res, 401, false, msg.invalidOtpMessage);
+      return Response(res, 404, false, msg.invalidOtpMessage);
     }
 
     //saving after the verification
@@ -403,8 +436,8 @@ export const LoginVerify = async (req, res) => {
     await user.save();
 
     //generating and saving the token
-    const token = user.generateToken();
-
+    const token = await user.generateToken();
+    console.log(token);
     const options = {
       expires: new Date(
         Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
@@ -413,11 +446,13 @@ export const LoginVerify = async (req, res) => {
       sameSite: "none",
       secure: true,
     };
+    console.log("working");
     //sending response
     res.status(200).cookie("token", token, options).json({
       success: true,
       message: msg.loginSuccessfulMessage,
       data: user,
+      
     });
   } catch (error) {
     Response(res, 400, false, error.message);
@@ -511,3 +546,39 @@ export const updateUser = async (req, res) => {
     Response(res, 500, false, error.message);
   }
 };
+
+
+
+
+
+// import express from "express";
+// import multer from "multer"
+// import path from "path"
+// import { loginUser, logoutUser, myProfile, registerUser, resendLoginOtp, resendOtp, updateUser, verifyLoginOtp, verifyUser } from "../controllers/userController.js";
+// import { isAuthenticated } from "../middleware/auth.js";
+
+// const storage = multer.diskStorage({
+//     destination : function(req,file,cb){
+//         cb(null, 'public/uploads/');
+//     },
+//     filename : function(req,file,cb){
+//         cb(null,file.originalname + "-" +Date.now() + path.extname(file.originalname))
+//     }
+// });
+
+// const upload = multer({
+//     storage : storage,
+//     fileFilter : function(req,file,cb){
+//         const filetypes = /jpeg|jpg|png/;
+//         const mimetype = filetypes.test(file.mimetype);
+//         const extname = filetypes.test(path.extname(file.originalname));
+//         if(mimetype && extname)
+//         {
+//             return cb(null, true);
+//         }
+//         cb("Error: File upload only supports the following file types - "+filetypes);
+//     },
+//     limits:{
+//         fileSize:1024*1024*process.env.MAX_FILE_SIZE
+//     }
+// })
