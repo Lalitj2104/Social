@@ -416,10 +416,10 @@ export const LoginVerify = async (req, res) => {
     }
 
     //matching the otp
-    console.log(otp);
+    // console.log(otp);
     otp = Number(otp);
-    console.log(typeof otp);
-    console.log(typeof user.loginOtp);
+    // console.log(typeof otp);
+    // console.log(typeof user.loginOtp);
     
     if (user?.loginOtp !== otp) {
       user.otpAttempts += 1;
@@ -437,7 +437,7 @@ export const LoginVerify = async (req, res) => {
 
     //generating and saving the token
     const token = await user.generateToken();
-    console.log(token);
+    // console.log(token);
     const options = {
       expires: new Date(
         Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
@@ -446,7 +446,7 @@ export const LoginVerify = async (req, res) => {
       sameSite: "none",
       secure: true,
     };
-    console.log("working");
+    // console.log("working");
     //sending response
     res.status(200).cookie("token", token, options).json({
       success: true,
@@ -510,7 +510,7 @@ export const logoutUser = async (req, res) => {
       secure: true,
     });
 
-    Response(res, 200, true, message.logoutMessage);
+    Response(res, 200, true, msg.logoutMessage);
   } catch (error) {
     Response(res, 500, false, error.message);
   }
