@@ -7,6 +7,7 @@ export const isAuthenticated = async (req, res, next) => {
     try {
         // Parsing cookies
         const { token } = req.cookies;
+        console.log(token);
 
         // Check token
         if(!token) {
@@ -15,9 +16,9 @@ export const isAuthenticated = async (req, res, next) => {
 
         // Verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
+        
         // Find user from token
-        const user = await User.findById(decoded._id);
+        const user = await User.findById(decoded.id);
 
         // Check user
         if(!user) {

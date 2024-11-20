@@ -11,7 +11,7 @@ userRouter.post("/login",loginUser)
 userRouter.post("/login/verify/:id",LoginVerify)
 userRouter.get("/login/resend/:id",LoginOtpResend)
 userRouter.get("/logout",isAuthenticated,logoutUser);
-userRouter.get("/my/profile",isAuthenticated,myProfile);
+userRouter.get("/me",isAuthenticated,myProfile);
 userRouter.patch("/update/profile",isAuthenticated,updateUser);
 
 

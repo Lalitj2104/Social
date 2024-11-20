@@ -5,15 +5,9 @@ import { Response } from "../utils/response.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
-import cloudinary from "cloudinary"
+import cloudinary from "cloudinary";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-
-let emailTemplate = fs.readFileSync(
-  path.join(__dirname, "../templates/mail.html"),
-  "utf-8"
-);
 
 export const registerUser = async (req, res) => {
   try {
@@ -28,7 +22,7 @@ export const registerUser = async (req, res) => {
       bio,
       username,
       gender,
-      avatar
+      avatar,
     } = req.body;
 
     if (
@@ -64,18 +58,17 @@ export const registerUser = async (req, res) => {
       });
     }
     //upload image in cloudinary
-    if(avatar){
-      const result=await cloudinary.v2.uploader.upload(avatar,{
-        folder:"avators",
+    if (avatar) {
+      const result = await cloudinary.v2.uploader.upload(avatar, {
+        folder: "avators",
         //width:150
         //crp:"scale",
         //height:150,
-      })
-        req.body.avatar={
-          public_id:result.public_id,
-          url:result.secure_url
-        }
-      
+      });
+      req.body.avatar = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
     }
 
     user = await User.create({ ...req.body });
@@ -87,6 +80,10 @@ export const registerUser = async (req, res) => {
     user.otpLockUntil = undefined;
     await user.save();
 
+    let emailTemplate = fs.readFileSync(
+      path.join(__dirname, "../templates/mail.html"),
+      "utf-8"
+    );
     //Email generation
     const subject = "Verify ur Account";
     // const body = `your OTP is ${otp}`;
@@ -262,6 +259,11 @@ export const resendOtp = async (req, res) => {
     await user.save();
 
     //send otp
+
+    let emailTemplate = fs.readFileSync(
+      path.join(__dirname, "../templates/mail.html"),
+      "utf-8"
+    );
     const subject = "Verify your account";
     // const body = `Your OTP is ${otp}`;
     // await sendEMail({email: user.email, subject, body});
@@ -298,8 +300,8 @@ export const loginUser = async (req, res) => {
     }
     // console.log(user);
     //if user not verified
-    if(!user.isVerified){
-      return Response(res,400,false,msg.userNotVerifiedMessage)
+    if (!user.isVerified) {
+      return Response(res, 400, false, msg.userNotVerifiedMessage);
     }
 
     //if login attempt is locked
@@ -339,6 +341,11 @@ export const loginUser = async (req, res) => {
     );
 
     //send otp
+
+    let emailTemplate = fs.readFileSync(
+      path.join(__dirname, "../templates/mail.html"),
+      "utf-8"
+    );
     const subject = "Two step verification";
     // const body = `Your OTP is ${otp}`;
 
@@ -358,7 +365,7 @@ export const loginUser = async (req, res) => {
     await user.save();
 
     // send response
-    Response(res, 200, true, msg.otpSendMessage,user._id);
+    Response(res, 200, true, msg.otpSendMessage, user._id);
     // res.render("otp",{
     //   id:user._id,
     // });
@@ -391,8 +398,8 @@ export const LoginVerify = async (req, res) => {
     // console.log(user);
 
     //if user not verified
-    if(!user.isVerified){
-      return Response(res,400,false,msg.userNotVerifiedMessage)
+    if (!user.isVerified) {
+      return Response(res, 400, false, msg.userNotVerifiedMessage);
     }
     //checking lock to login
     if (user?.loginOtpAttemptsExpire > Date.now()) {
@@ -420,7 +427,7 @@ export const LoginVerify = async (req, res) => {
     otp = Number(otp);
     // console.log(typeof otp);
     // console.log(typeof user.loginOtp);
-    
+
     if (user?.loginOtp !== otp) {
       user.otpAttempts += 1;
       await user.save();
@@ -452,7 +459,6 @@ export const LoginVerify = async (req, res) => {
       success: true,
       message: msg.loginSuccessfulMessage,
       data: user,
-      
     });
   } catch (error) {
     Response(res, 400, false, error.message);
@@ -485,6 +491,11 @@ export const LoginOtpResend = async (req, res) => {
     await user.save();
 
     //send mail
+
+    let emailTemplate = fs.readFileSync(
+      path.join(__dirname, "../templates/mail.html"),
+      "utf-8"
+    );
     const subject = "Two step verification";
 
     emailTemplate = emailTemplate.replace("{{OTP_CODE}}", otp);
@@ -546,10 +557,6 @@ export const updateUser = async (req, res) => {
     Response(res, 500, false, error.message);
   }
 };
-
-
-
-
 
 // import express from "express";
 // import multer from "multer"

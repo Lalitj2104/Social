@@ -19,6 +19,10 @@ export const message = {
   unAuthorizedMessage:"Please login to access this resource",
   badAuthMessage: "Invalid email or password",
   userNotVerifiedMessage:"user is not verified,Please first verify",
-  otpSendMessage:"otp sent successfully"
+  otpSendMessage:"otp sent successfully",
+  postNotFoundMessage:"No post found",
+  postFoundMessage:"Post found successfully",
+  postCreatedMessage:"Post created successfully",
+  
 };
 
