@@ -1,6 +1,6 @@
-import { isAuthenticated } from "../middleware/auth";
-import express from express;
-import { addComment, addReply, getAllComments, getAllRepliesByComment, getAllRepliesByPost, getCommentById, getReplyById } from "../controllers/postcontroller";
+import { isAuthenticated } from "../middleware/auth.js";
+import express from "express";
+import { addComment, addReply, getAllComments, getAllRepliesByComment, getAllRepliesByPost, getCommentById, getReplyById } from "../controllers/postcontroller.js";
 
 const commentRouter=express.Router();
 
