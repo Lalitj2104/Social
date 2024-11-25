@@ -22,7 +22,19 @@ export const message = {
   otpSendMessage:"otp sent successfully",
   postNotFoundMessage:"No post found",
   postFoundMessage:"Post found successfully",
+  postsNotFoundMessage:"No posts found",
+  postsFoundMessage:"Posts found successfully",
   postCreatedMessage:"Post created successfully",
-  
+  notAuthorizedMessage:"Not Authorized",
+  postDeletedMessage:"Post deleted successfully",
+  imageNotFoundMessage:"Please provide an image",
+  commentCreatedMessage:"Comment created successfully",
+  commentNotFoundMessage:"Comment not found",
+  commentFoundMessage:"Comment found successfully",
+  replyCreatedMessage:"Reply created successfully",
+  replyNotFoundMessage:"Reply found successfully",
+  replyFoundMessage:"Reply found successfully",
+  commentsFoundMessage:"Comments found successfully",
+  commentsNotFoundMessage:"Comments not found"
 };
 

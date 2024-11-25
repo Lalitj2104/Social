@@ -23,14 +23,9 @@ const postSchema = mongoose.Schema(
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User_Soc" }],
     comments: [
       {
-        comment: {
-          type: String,
-        },
-        owner: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User_Soc",
-          required: true,
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"Comment"
+          
       },
     ],
     mentions: [

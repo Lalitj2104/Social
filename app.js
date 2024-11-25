@@ -6,6 +6,7 @@ import postRouter from "./routes/postRoute.js";
 import path from "path"
 import cors from "cors"
 import cookieParser from "cookie-parser"
+import commentRouter from "./routes/commentRoute.js";
 
 dotenv.config({path : "./config/config.env"})
 
@@ -39,4 +40,5 @@ app.get("/login",(req,res)=>{
 
 app.use("/api/v1/user",userRouter);
 app.use("api/v1/post",postRouter);
+app.use("api/v1/comment",commentRouter);
 export default app;
